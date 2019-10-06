@@ -40,7 +40,7 @@ class ProductService extends Service {
       specs,
       skus: specsUnderGoods,
     }
-    console.log(result)
+    // console.log(result)
     return result
   }
 

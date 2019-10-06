@@ -10,6 +10,22 @@ class UserService extends Service {
 
     return user
   }
+
+  async findById(id) {
+    const user = await this.app.mysql.get('zshop_tb_user', {
+      id: id,
+    })
+
+    return user
+  }
+
+  async add(user) {
+    const result = await this.app.mysql.insert('zshop_tb_user', {
+      ...user
+    })
+
+    return result.insertId
+  }
 }
 
 module.exports = UserService

@@ -4,6 +4,8 @@ const BaseController = require('../core/base_controller')
 const crypto = require('crypto')
 const isEmpty = require('lodash/isEmpty')
 const uuidv1 = require('uuid/v1')
+const jwt = require('jsonwebtoken');
+const secret = 'zhuerlehaha6233@@';
 
 class AuthController extends BaseController {
   async weixin() {
@@ -44,24 +46,35 @@ class AuthController extends BaseController {
       this.fail({ code: 1000, msg: '登录失败' })
     }
 
-    console.log(this.ctx.socket.remoteAddress)
+    const clientIp = this.ctx.socket.remoteAddress;
     let user = await this.ctx.service.user.findByOpenId(wechatUserInfo.openId)
-    // if (user == null) {
-    //   await this.ctx.service.user.add({
-    //     username: '微信用户' + uuidv1(),
-    //     password: "",
-    //     register_time: parseInt(new Date().getTime() / 1000),
-    //     register_ip: clientIp,
-    //     mobile: '',
-    //     weixin_openid: userInfo.openId,
-    //     avatar: userInfo.avatarUrl || '',
-    //     gender: userInfo.gender || 1, // 性别 0：未知、1：男、2：女
-    //     nickname: userInfo.nickName
-    //   })
-    // }
+    let userId;
+    console.log(user)
+    console.log('找到 user 了没？ ', user != null)
+    if (user == null) {
+      userId = await this.ctx.service.user.add({
+        username: '微信用户' + uuidv1(),
+        password: "",
+        register_time: parseInt(new Date().getTime() / 1000),
+        register_ip: clientIp,
+        mobile: '',
+        weixin_openid: wechatUserInfo.openId,
+        avatar: wechatUserInfo.avatarUrl || '',
+        gender: wechatUserInfo.gender || 1, // 性别 0：未知、1：男、2：女
+        nickname: wechatUserInfo.nickName
+      })
+    } else {
+      userId = user.id
+    }
 
-    const allProducts = await ctx.service.product.findAll()
-    this.success({ wechatUserInfo, user })
+    // 重新查出来
+    const newUser = await this.ctx.service.user.findById(userId);
+
+    var token = jwt.sign({ user_id: userId }, secret);
+    console.log('token = ' + token)
+
+    // const allProducts = await ctx.service.product.findAll()
+    this.success({ token, userInfo: newUser })
   }
 
   /**
@@ -85,7 +98,7 @@ class AuthController extends BaseController {
       decoded += decipher.final('utf8')
       const userInfo = JSON.parse(decoded)
 
-      console.log(userInfo)
+      // console.log(userInfo)
 
       if (userInfo.watermark.appid !== 'wx87de1f9357bb4b2f') {
         return null

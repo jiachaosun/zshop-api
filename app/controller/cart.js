@@ -10,12 +10,37 @@ class CartController extends Controller {
     const { ctx } = this
     const { request } = ctx
     const { body } = request
-    const { specValues, goods_id, goods_no } = body //规格数据
-    // const goodsDetail = await ctx.service.product.findById(goodsId)
+    const {
+      specValues,
+      goods_id,
+      goods_no,
+      sku_id,
+      goods_name,
+      price,
+      amount,
+    } = body //规格数据
+    console.log(
+      specValues,
+      goods_id,
+      goods_no,
+      sku_id,
+      goods_name,
+      price,
+      amount
+    )
+    const cartId = await ctx.service.cart.add({
+      specValues,
+      goods_id,
+      goods_no,
+      sku_id,
+      goods_name,
+      price,
+      amount,
+    })
     ctx.body = {
       code: 0,
       msg: 'ok',
-      data: {},
+      data: { cartId },
     }
   }
 }

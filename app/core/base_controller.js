@@ -4,6 +4,15 @@ class BaseController extends Controller {
     return this.ctx.session.user
   }
 
+  /**
+   * 获取当前登录用户的id
+   * @returns {*}
+   */
+  getLoginUserId() {
+    // return this.ctx.state.userId
+    return 1
+  }
+
   success(data) {
     this.ctx.body = {
       code: 0,

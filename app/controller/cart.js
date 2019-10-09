@@ -43,6 +43,17 @@ class CartController extends Controller {
       data: { cartId },
     }
   }
+
+  async getCart() {
+    const { ctx } = this
+
+    const cartInfo = await ctx.service.cart.getCart()
+    ctx.body = {
+      code: 0,
+      msg: 'ok',
+      data: cartInfo,
+    }
+  }
 }
 
 module.exports = CartController

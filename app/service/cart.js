@@ -45,6 +45,17 @@ class CartService extends Service {
     console.log(result)
     return result.insertId
   }
+
+  async getCart() {
+    const cartInfo = await this.app.mysql.select('zshop_tb_cart', {
+      where: { user_id: 1 },
+    })
+
+    // console.log('=== 购物车数据 ===')
+    // console.log(cartInfo)
+
+    return cartInfo;
+  }
 }
 
 module.exports = CartService

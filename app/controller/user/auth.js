@@ -1,6 +1,6 @@
 'use strict'
 
-const BaseController = require('../core/base_controller')
+const BaseController = require('../../core/base_controller')
 const crypto = require('crypto')
 const isEmpty = require('lodash/isEmpty')
 const uuidv1 = require('uuid/v1')

@@ -1,8 +1,13 @@
 'use strict'
 
-const Controller = require('egg').Controller
+const Controller = require('egg-gat-common-modules').BasicController
 
 class CheckoutController extends Controller {
+  constructor(ctx) {
+    super(ctx)
+    this.checkoutService = ctx.service.checkout.checkoutService
+  }
+
   /**
    * 加入购物车
    */
@@ -11,13 +16,9 @@ class CheckoutController extends Controller {
     const { request } = ctx
     const { body } = request
 
-    const checkoutInfo = await this.ctx.service.checkout.getCheckoutInfo()
+    const checkoutInfo = await this.checkoutService.getCheckoutInfo()
 
-    ctx.body = {
-      code: 0,
-      msg: 'ok',
-      data: { checkoutInfo },
-    }
+    this.success(checkoutInfo)
   }
 
   async submitOrder() {
@@ -49,13 +50,9 @@ class CheckoutController extends Controller {
 
     console.log(address)
 
-    const cartInfo = await ctx.service.checkout.submitOrder(address)
+    const cartInfo = await this.checkoutService.submitOrder(address)
 
-    ctx.body = {
-      code: 0,
-      msg: 'ok',
-      data: {},
-    }
+    this.success()
   }
 }
 

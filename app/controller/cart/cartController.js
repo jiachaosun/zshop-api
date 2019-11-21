@@ -1,8 +1,13 @@
 'use strict'
 
-const Controller = require('egg').Controller
+const Controller = require('egg-gat-common-modules').BasicController
 
 class CartController extends Controller {
+  constructor(ctx) {
+    super(ctx)
+    this.cartService = ctx.service.cart.cartService
+  }
+
   /**
    * 加入购物车
    */
@@ -28,7 +33,7 @@ class CartController extends Controller {
       price,
       amount
     )
-    const cartId = await ctx.service.cart.add({
+    const cartId = await this.cartService.add({
       specValues,
       goods_id,
       goods_no,
@@ -37,22 +42,14 @@ class CartController extends Controller {
       price,
       amount,
     })
-    ctx.body = {
-      code: 0,
-      msg: 'ok',
-      data: { cartId },
-    }
+    this.success(cartId)
   }
 
   async getCart() {
     const { ctx } = this
 
-    const cartInfo = await ctx.service.cart.getCart()
-    ctx.body = {
-      code: 0,
-      msg: 'ok',
-      data: cartInfo,
-    }
+    const cartInfo = await this.cartService.getCart()
+    this.success(cartInfo)
   }
 }
 

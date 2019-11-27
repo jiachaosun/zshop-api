@@ -5,12 +5,12 @@ const Controller = require('egg-gat-common-modules').BasicController
 class HomeController extends Controller {
   constructor(ctx) {
     super(ctx)
-    this.homeService = ctx.service.home.homeService
+    this.productService = ctx.service.product.productService
   }
 
   async index() {
     const { ctx } = this
-    const allProducts = await this.homeService.findAll()
+    const allProducts = await this.productService.findAll()
     this.success(allProducts)
   }
 }

@@ -11,7 +11,7 @@ class UserService extends Service {
     return user
   }
 
-  async findById(id) {
+  async findUserById(id) {
     const user = await this.app.mysql.get('zshop_tb_user', {
       id: id,
     })

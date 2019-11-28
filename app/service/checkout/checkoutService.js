@@ -1,25 +1,30 @@
 // app/service/product.js
-const Service = require('egg').Service
-const keys = require('lodash/keys')
-const isNil = require('lodash/isNil')
-const padStart = require('lodash/padStart')
-const random = require('lodash/random')
+const Service = require("egg").Service;
+const keys = require("lodash/keys");
+const isNil = require("lodash/isNil");
+const padStart = require("lodash/padStart");
+const random = require("lodash/random");
 
 class CheckoutService extends Service {
+  constructor(ctx) {
+    super(ctx);
+    this.cartService = ctx.service.cart.cartService;
+  }
+
   async getCheckoutInfo() {
-    const cartData = await this.service.cart.getCart()
+    const cartData = await this.cartService.getCart();
     const selectedCartData = cartData.filter(
       cartItem => cartItem.selected === 1
-    )
+    );
 
-    console.log('=== 选中的购物车数据 ===')
-    console.log(selectedCartData)
+    console.log("=== 选中的购物车数据 ===");
+    console.log(selectedCartData);
 
-    return selectedCartData
+    return selectedCartData;
   }
 
   async submitOrder(address) {
-    const selectedGoodsInCart = await this.service.cart.getCart()
+    const selectedGoodsInCart = await this.cartService.getCart();
 
     // 解析地址
     const {
@@ -30,21 +35,21 @@ class CheckoutService extends Service {
       postalCode,
       provinceName,
       telNumber,
-      userName,
-    } = address
+      userName
+    } = address;
 
     // 统计商品总价
-    let goodsTotalPrice = 0.0
+    let goodsTotalPrice = 0.0;
     for (const cartItem of selectedGoodsInCart) {
-      goodsTotalPrice += cartItem.amount * cartItem.price
+      goodsTotalPrice += cartItem.amount * cartItem.price;
     }
 
     // 订单价格计算
-    const freightPrice = 0.0 // 运费设置为0
-    const couponPrice = 0.0 // 优惠券设置为0
-    const orderTotalPrice = goodsTotalPrice + freightPrice - couponPrice // 订单的总价
-    const actualPrice = orderTotalPrice - 0.0 // 减去其它支付的金额后，要实际支付的金额
-    const currentTime = new Date().getTime()
+    const freightPrice = 0.0; // 运费设置为0
+    const couponPrice = 0.0; // 优惠券设置为0
+    const orderTotalPrice = goodsTotalPrice + freightPrice - couponPrice; // 订单的总价
+    const actualPrice = orderTotalPrice - 0.0; // 减去其它支付的金额后，要实际支付的金额
+    const currentTime = new Date();
 
     const orderInfo = {
       order_sn: this.generateOrderNumber(),
@@ -62,15 +67,15 @@ class CheckoutService extends Service {
       created_time: currentTime,
       goods_price: goodsTotalPrice,
       order_price: orderTotalPrice,
-      actual_price: actualPrice,
-    }
+      actual_price: actualPrice
+    };
 
     const addOrderResult = await this.app.mysql.insert(
-      'zshop_tb_order',
+      "zshop_tb_order",
       orderInfo
-    )
+    );
 
-    orderInfo.id = addOrderResult.insertId
+    orderInfo.id = addOrderResult.insertId;
   }
 
   /**
@@ -78,17 +83,17 @@ class CheckoutService extends Service {
    * @returns {string}
    */
   generateOrderNumber() {
-    const date = new Date()
+    const date = new Date();
     return (
       date.getFullYear() +
-      padStart(date.getMonth(), 2, '0') +
-      padStart(date.getDay(), 2, '0') +
-      padStart(date.getHours(), 2, '0') +
-      padStart(date.getMinutes(), 2, '0') +
-      padStart(date.getSeconds(), 2, '0') +
+      padStart(date.getMonth(), 2, "0") +
+      padStart(date.getDay(), 2, "0") +
+      padStart(date.getHours(), 2, "0") +
+      padStart(date.getMinutes(), 2, "0") +
+      padStart(date.getSeconds(), 2, "0") +
       random(100000, 999999)
-    )
+    );
   }
 }
 
-module.exports = CheckoutService
+module.exports = CheckoutService;

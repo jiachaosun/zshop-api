@@ -1,20 +1,20 @@
-'use strict'
+"use strict";
 
-const Controller = require('egg-gat-common-modules').BasicController
+const Controller = require("egg-gat-common-modules").BasicController;
 
-class ProductDetail extends Controller {
+class ProductController extends Controller {
   constructor(ctx) {
-    super(ctx)
-    this.productService = ctx.service.product.productService
+    super(ctx);
+    this.productService = ctx.service.product.productService;
   }
 
-  async find() {
-    const { ctx, productService } = this
-    const { params } = ctx
-    const { goodsId } = params
-    const goodsDetail = await productService.findById(goodsId)
-    this.success(goodsDetail)
+  async getProductDetail() {
+    const { ctx, productService } = this;
+    const { query } = ctx;
+    const { goods_id } = query;
+    const goodsDetail = await productService.findById(goods_id);
+    this.success(goodsDetail);
   }
 }
 
-module.exports = ProductDetail
+module.exports = ProductController;

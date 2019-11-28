@@ -9,7 +9,7 @@ class AuthService extends Service {
   constructor(ctx) {
     super(ctx);
     this.userService = ctx.service.common.userService;
-    this.filterList = [ "/auth/weixin", "/home/index" ]; // 不需要校验的请求
+    this.filterList = [ "/auth/weixin" ]; // 不需要校验的请求
   }
 
   /**

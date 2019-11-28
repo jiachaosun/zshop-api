@@ -1,59 +1,55 @@
-'use strict'
+"use strict";
 
-const Controller = require('egg-gat-common-modules').BasicController
+const Controller = require("egg-gat-common-modules").BasicController;
 
 class CheckoutController extends Controller {
   constructor(ctx) {
-    super(ctx)
-    this.checkoutService = ctx.service.checkout.checkoutService
+    super(ctx);
+    this.checkoutService = ctx.service.checkout.checkoutService;
   }
 
   /**
    * 加入购物车
    */
   async checkout() {
-    const { ctx } = this
-    const { request } = ctx
-    const { body } = request
+    const { ctx } = this;
+    const { request } = ctx;
+    const { body } = request;
 
-    const checkoutInfo = await this.checkoutService.getCheckoutInfo()
+    const checkoutInfo = await this.checkoutService.getCheckoutInfo();
 
-    this.success(checkoutInfo)
+    this.success(checkoutInfo);
   }
 
   async submitOrder() {
-    const { ctx } = this
-    const { request } = ctx
-    const { body } = request
+    const { ctx } = this;
+    const { request } = ctx;
+    const { body } = request;
 
     const {
-      cityName,
-      countyName,
-      detailInfo,
-      nationalCode,
-      postalCode,
-      provinceName,
-      telNumber,
-      userName,
-    } = body
+      checkoutInfo,
+      addressInfo
+    } = body;
 
-    const address = {
-      cityName,
-      countyName,
-      detailInfo,
-      nationalCode,
-      postalCode,
-      provinceName,
-      telNumber,
-      userName,
-    }
+    console.log(checkoutInfo);
+    console.log(addressInfo);
+    // const address = {
+    //   cityName,
+    //   countyName,
+    //   detailInfo,
+    //   nationalCode,
+    //   postalCode,
+    //   provinceName,
+    //   telNumber,
+    //   userName
+    // };
+    //
+    // console.log(address);
+    //
+    const cartInfo = await this.checkoutService.submitOrder(addressInfo);
 
-    console.log(address)
-
-    const cartInfo = await this.checkoutService.submitOrder(address)
-
-    this.success()
+    this.success();
   }
 }
 
-module.exports = CheckoutController
+module.exports = CheckoutController;

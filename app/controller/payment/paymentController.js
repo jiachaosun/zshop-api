@@ -12,7 +12,8 @@ class PaymentController extends Controller {
 
   async prepay() {
     const { ctx } = this;
-    const result = await this.paymentService.createPrepayInfo();
+    const { order_sn } = ctx.request.body;
+    const result = await this.paymentService.createPrepayInfo(order_sn);
     this.success(result);
   }
 

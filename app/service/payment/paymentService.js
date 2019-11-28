@@ -12,8 +12,7 @@ class PaymentService extends Service {
     this.userService = ctx.service.common.userService;
   }
 
-  async createPrepayInfo() {
-    const order_sn = "20191003155220235323";
+  async createPrepayInfo(order_sn) {
     const orderInfo = await this.app.mysql.get("zshop_tb_order", { order_sn: order_sn });
 
     const { user_id } = orderInfo;

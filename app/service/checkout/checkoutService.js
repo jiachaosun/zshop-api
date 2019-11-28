@@ -53,7 +53,7 @@ class CheckoutService extends Service {
 
     const orderInfo = {
       order_sn: this.generateOrderNumber(),
-      user_id: 1,
+      user_id: this.ctx.userInfo.user_id,
 
       // 收货地址和运费
       consignee: userName,

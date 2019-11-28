@@ -32,7 +32,7 @@ class CartService extends Service {
         goods_name,
         price,
         amount,
-        selected: 0,
+        selected: 1,
         pic_url: ""
       });
     } else {
@@ -48,7 +48,7 @@ class CartService extends Service {
 
   async getCart() {
     const cartInfo = await this.app.mysql.select("zshop_tb_cart", {
-      where: { user_id: 1, selected: 1 }
+      where: { user_id: this.ctx.userInfo.user_id, selected: 1 }
     });
 
     // console.log('=== 购物车数据 ===')

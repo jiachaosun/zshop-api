@@ -23,12 +23,12 @@ class AuthService extends Service {
     try {
       const _token = await parse(token);
       const { user_id } = _token;
-      console.log("user_id = " + user_id);
       user = await this.userService.findUserById(user_id);
-      console.log(user);
+      if (user == null) throw Error("未登录");
+      console.log("user_id = " + user_id + ", name = " + user.nickname);
     } catch (e) {
       ctx.status = 401;
-      ctx.app.logger.error(e);
+      console.error(e);
     }
     ctx.userInfo = {
       user_id: user.id,

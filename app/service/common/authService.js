@@ -3,7 +3,6 @@ const Service = require("egg").Service;
 const { getCookie } = require("../../utils/requestTools.js");
 const { parse } = require("../../utils/token");
 const { COMMON_PARAMETER_ERROR, AUTH_ERROR } = require("../../exception/exceptionCode");
-const { Exception } = require("egg-gat-exception");
 
 class AuthService extends Service {
   constructor(ctx) {
@@ -30,7 +29,6 @@ class AuthService extends Service {
     } catch (e) {
       ctx.status = 401;
       ctx.app.logger.error(e);
-      throw new Exception(AUTH_ERROR);
     }
     ctx.userInfo = {
       user_id: user.id,

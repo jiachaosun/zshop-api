@@ -1,6 +1,6 @@
 "use strict";
 
-const Controller = require("egg-gat-common-modules").BasicController;
+const Controller = require("../../core/baseController");
 const crypto = require("crypto");
 const isEmpty = require("lodash/isEmpty");
 const uuidv1 = require("uuid/v1");

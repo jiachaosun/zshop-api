@@ -1,6 +1,6 @@
 "use strict";
 
-const Controller = require("egg-gat-common-modules").BasicController;
+const Controller = require("../../core/baseController");
 
 class ProductController extends Controller {
   constructor(ctx) {

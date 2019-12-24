@@ -77,14 +77,14 @@ class CheckoutService extends Service {
     const orderId = await this.orderService.createOrder(orderInfo);
     orderInfo.id = orderId;
 
-    const orderGoodsData = [];
     for (const goodsItem of selectedGoodsInCart) {
 
       const specValueResult = await this.productService.getSkuSpecValue(goodsItem.sku_spec_id);
-      orderGoodsData.push({
+
+      const result = await this.app.mysql.insert("zshop_tb_order_goods", {
         order_id: orderId,
         goods_id: goodsItem.goods_id,
-        goods_sn: goodsItem.goods_sn,
+        // goods_sn: goodsItem.goods_sn,
         sku_spec_id: goodsItem.sku_spec_id,
         amount: goodsItem.amount,
         goods_name: goodsItem.goods_name,

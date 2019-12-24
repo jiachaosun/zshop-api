@@ -15,13 +15,17 @@ class OrderService extends Service {
     const orders = await this.app.mysql.select(ORDER_TABLE_NAME);
 
     //处理数据格式
-    let newOrderList = orders.map(order => {
-      return {
-        ...order,
-        created_time: dayjs(order.created_time)
-          .format("YYYY-MM-DD HH:mm:ss")
-      };
-    });
+    let newOrderList = [];
+    for (let orderItem of orders) {
+      // 获取订单下属的商品列表
+      const orderGoods = await this.getOrderGoods(orderItem.id);
+      newOrderList.push({
+        ...orderItem,
+        created_time: dayjs(orderItem.created_time) //转换时间
+          .format("YYYY-MM-DD HH:mm:ss"),
+        order_goods: orderGoods
+      });
+    }
 
     return newOrderList;
   }
@@ -42,6 +46,13 @@ class OrderService extends Service {
   async updateOrder(params) {
     const result = await this.app.mysql.update(ORDER_TABLE_NAME, { ...params });
     return result.affectedRows === 1;
+  }
+
+  async getOrderGoods(orderId) {
+    const results = await this.app.mysql.select("zshop_tb_order_goods", {
+      where: { order_id: orderId }
+    });
+    return results;
   }
 }
 

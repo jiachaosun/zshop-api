@@ -4,6 +4,12 @@ const keys = require("lodash/keys");
 const isNil = require("lodash/isNil");
 
 class CartService extends Service {
+  constructor(ctx) {
+    super(ctx);
+    this.productService = this.ctx.service.product.productService;
+  }
+
+
   async add(cartInfo) {
     const {
       specValues,
@@ -48,11 +54,21 @@ class CartService extends Service {
 
   async getCart() {
     const cartInfo = await this.app.mysql.select("zshop_tb_cart", {
-      where: { user_id: this.ctx.userInfo.user_id, selected: 1 }
+      where: { user_id: this.ctx.userInfo.user_id }
     });
 
-    // console.log('=== 购物车数据 ===')
-    // console.log(cartInfo)
+    // 处理规格信息
+    for (let index in cartInfo) {
+      const cartItem = cartInfo[index];
+      const { sku_spec_id } = cartItem;
+      const specValueResult = await this.productService.getSkuSpecValue(sku_spec_id);
+      const { goods_attrs } = specValueResult;
+      cartInfo[index] = {
+        ...cartItem,
+        goods_attrs: JSON.parse(goods_attrs)
+      };
+    }
+
 
     return cartInfo;
   }

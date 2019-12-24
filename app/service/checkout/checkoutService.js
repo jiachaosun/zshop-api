@@ -9,6 +9,8 @@ class CheckoutService extends Service {
   constructor(ctx) {
     super(ctx);
     this.cartService = ctx.service.cart.cartService;
+    this.orderService = ctx.service.order.orderService;
+    this.productService = ctx.service.product.productService;
   }
 
   async getCheckoutInfo() {
@@ -24,6 +26,7 @@ class CheckoutService extends Service {
   }
 
   async submitOrder(address) {
+    // 购物车中选中的商品
     const selectedGoodsInCart = await this.cartService.getCart();
 
     // 解析地址
@@ -51,6 +54,7 @@ class CheckoutService extends Service {
     const actualPrice = orderTotalPrice - 0.0; // 减去其它支付的金额后，要实际支付的金额
     const currentTime = new Date();
 
+    // 构造订单数据
     const orderInfo = {
       order_sn: this.generateOrderNumber(),
       user_id: this.ctx.userInfo.user_id,
@@ -70,12 +74,28 @@ class CheckoutService extends Service {
       actual_price: actualPrice
     };
 
-    const addOrderResult = await this.app.mysql.insert(
-      "zshop_tb_order",
-      orderInfo
-    );
+    const orderId = await this.orderService.createOrder(orderInfo);
+    orderInfo.id = orderId;
 
-    orderInfo.id = addOrderResult.insertId;
+    const orderGoodsData = [];
+    for (const goodsItem of selectedGoodsInCart) {
+
+      const specValueResult = await this.productService.getSkuSpecValue(goodsItem.sku_spec_id);
+      orderGoodsData.push({
+        order_id: orderId,
+        goods_id: goodsItem.goods_id,
+        goods_sn: goodsItem.goods_sn,
+        sku_spec_id: goodsItem.sku_spec_id,
+        amount: goodsItem.amount,
+        goods_name: goodsItem.goods_name,
+        pic_url: goodsItem.list_pic_url,
+        market_price: goodsItem.market_price,
+        retail_price: goodsItem.price,
+        sku_attrs_values: specValueResult.goods_attrs
+      });
+    }
+
+    return orderInfo;
   }
 
   /**

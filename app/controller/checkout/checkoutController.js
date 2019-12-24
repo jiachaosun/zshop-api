@@ -21,6 +21,9 @@ class CheckoutController extends Controller {
     this.success(checkoutInfo);
   }
 
+  /**
+   * 提交订单
+   */
   async submitOrder() {
     const { ctx } = this;
     const { request } = ctx;
@@ -33,22 +36,10 @@ class CheckoutController extends Controller {
 
     console.log(checkoutInfo);
     console.log(addressInfo);
-    // const address = {
-    //   cityName,
-    //   countyName,
-    //   detailInfo,
-    //   nationalCode,
-    //   postalCode,
-    //   provinceName,
-    //   telNumber,
-    //   userName
-    // };
-    //
-    // console.log(address);
-    //
-    const cartInfo = await this.checkoutService.submitOrder(addressInfo);
 
-    this.success();
+    const orderInfo = await this.checkoutService.submitOrder(addressInfo);
+
+    this.success(orderInfo);
   }
 }
 

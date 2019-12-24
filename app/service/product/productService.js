@@ -49,6 +49,11 @@ class ProductService extends Service {
     // console.log(goods)
     return goods;
   }
+
+  async getSkuSpecValue(specId) {
+    const specValue = await this.app.mysql.get("zshop_tb_specs", { sku_spec_id: specId });
+    return specValue;
+  }
 }
 
 module.exports = ProductService;

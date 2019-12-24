@@ -2,6 +2,7 @@
 
 module.exports = app => {
   const { router, controller } = app;
-  router.get("/checkout", controller.checkout.checkoutController.checkout);
-  router.post("/order/submit", controller.checkout.checkoutController.submitOrder);
+  const checkoutController = controller.checkout.checkoutController;
+  router.get("/checkout", checkoutController.checkout);
+  router.post("/order/submit", checkoutController.submitOrder);
 };

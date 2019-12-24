@@ -1,14 +1,20 @@
 // app/service/product.js
 const Service = require("egg").Service;
 const { getCookie } = require("../../utils/requestTools.js");
-const { parse } = require("../../utils/token");
+const { parse, verify } = require("../../utils/token");
 const { COMMON_PARAMETER_ERROR, AUTH_ERROR } = require("../../exception/exceptionCode");
+const { isEmpty } = require("lodash");
 
 class AuthService extends Service {
   constructor(ctx) {
     super(ctx);
     this.userService = ctx.service.common.userService;
-    this.filterList = [ "/auth/weixin", "/pay/notify" ]; // 不需要校验的请求
+    this.filterList = [
+      "/auth/weixin",
+      "/pay/notify",
+      "/home/index",
+      "/goods/detail"
+    ]; // 不需要校验的请求
   }
 
   /**
@@ -20,16 +26,17 @@ class AuthService extends Service {
     if (this.hasIncludes(ctx.request.url, this.notLoginUrlList())) return;
     const token = ctx.request.token;
     let user;
-    try {
-      const _token = await parse(token);
-      const { user_id } = _token;
-      user = await this.userService.findUserById(user_id);
-      if (user == null) throw Error("未登录");
-      console.log("user_id = " + user_id + ", name = " + user.nickname);
-    } catch (e) {
-      ctx.status = 401;
-      console.error(e);
-    }
+    // 目前无token过期机制
+    const _token = await parse(token);
+    // if (!_token) {
+    //   throw new Error("123");
+    // }
+    const { user_id } = _token;
+    user = await this.userService.findUserById(user_id);
+    // if (!user) {
+    //   throw new Error("456");
+    // }
+    console.log("user_id = " + user_id + ", name = " + user.nickname);
     ctx.userInfo = {
       user_id: user.id,
       name: user.name,

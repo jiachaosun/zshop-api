@@ -16,7 +16,7 @@ module.exports = appInfo => {
   config.keys = appInfo.name + "_1568280213431_2688";
 
   // add your middleware config here
-  config.middleware = [ "authenticate" ];
+  config.middleware = [ "errorHandler", "authenticate" ];
 
   // add your user config here
   const userConfig = {
@@ -47,15 +47,6 @@ module.exports = appInfo => {
     enableTypes: [ "json", "form", "text" ],
     extendTypes: {
       text: [ "text/xml", "application/xml" ]
-    }
-  };
-
-  config.onerror = {
-    all(err, ctx) {
-      // 在此处定义针对所有响应类型的错误处理方法
-      // 注意，定义了 config.all 之后，其他错误处理方法不会再生效
-      ctx.body = "error";
-      ctx.status = 500;
     }
   };
 

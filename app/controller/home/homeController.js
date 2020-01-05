@@ -6,12 +6,16 @@ class HomeController extends Controller {
   constructor(ctx) {
     super(ctx);
     this.productService = ctx.service.product.productService;
+    this.homeService = ctx.service.home.homeService;
   }
 
+  /**
+   * 首页接口
+   */
   async index() {
     const { ctx } = this;
-    const allProducts = await this.productService.findAll();
-    this.success(allProducts);
+    const homeData = await this.homeService.getHomeData();
+    this.success(homeData);
   }
 }
 

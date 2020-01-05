@@ -1,20 +1,12 @@
-'use strict'
+"use strict";
 
-const { app, assert } = require('egg-mock/bootstrap')
+const { app, assert } = require("egg-mock/bootstrap");
 
-describe('test for product service', () => {
-  // it('should get all goods', async () => {
-  //   const ctx = app.mockContext()
-
-  //   const goods = await ctx.service.product.findAll()
-
-  //   assert(goods)
-  // })
-
-  //   it('should get one goods which goods_id = 1', async () => {
-  //     const ctx = app.mockContext()
-
-  //     const goods = await ctx.service.product.findById(1)
-  //     assert(goods)
-  //   })
-})
+describe("test for product service", () => {
+  it("获取首页商品数据", async () => {
+    const ctx = app.mockContext();
+    const homeProductIds = [ 3, 4 ];
+    const goods = await ctx.service.product.productService.getHomePageProductList(homeProductIds);
+    assert(goods);
+  });
+});

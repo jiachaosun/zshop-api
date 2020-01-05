@@ -8,9 +8,5 @@ module.exports = {
   validate: {
     enable: true,
     package: "egg-validate"
-  },
-  // bizerror: {
-  //   enable: true,
-  //   package: "egg-bizerror"
-  // }
+  }
 };

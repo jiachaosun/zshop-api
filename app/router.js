@@ -8,4 +8,5 @@ module.exports = app => {
   require("./router/userRouter")(app);
   require("./router/orderRouter")(app);
   require("./router/paymentRouter")(app);
+  require("./router/categoryRouter")(app);
 };

@@ -22,17 +22,9 @@ class CartController extends Controller {
       sku_id,
       goods_name,
       price,
-      amount
+      amount,
     } = body; //规格数据
-    console.log(
-      specValues,
-      goods_id,
-      goods_no,
-      sku_id,
-      goods_name,
-      price,
-      amount
-    );
+
     const cartId = await this.cartService.add({
       specValues,
       goods_id,
@@ -40,7 +32,7 @@ class CartController extends Controller {
       sku_id,
       goods_name,
       price,
-      amount
+      amount,
     });
     this.success(cartId);
   }

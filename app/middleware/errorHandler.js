@@ -6,7 +6,7 @@ module.exports = () => {
       // 所有的异常都在 app 上触发一个 error 事件，框架会记录一条错误日志
       ctx.app.emit("error", err, ctx);
       const status = err.status || 500;
-      const message = err.message || "Internal Server Error";
+      const message = err.message || "服务器内部错误";
 
       // HTTP Code
       ctx.status = status;
@@ -16,9 +16,8 @@ module.exports = () => {
 
       // 错误响应对象
       ctx.body = {
-        code: -1,
+        code: status,
         message: (status === 500 && isProd) ? "Internal Server Error" : message
-        // detail: status === 422 ? err.errors : undefined, // 参数校验未通过
       };
     }
   };

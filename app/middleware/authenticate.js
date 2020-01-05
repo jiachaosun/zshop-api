@@ -2,11 +2,14 @@ const { getCookie } = require("../utils/requestTools.js");
 
 module.exports = options => {
   return async function authenticate(ctx, next) {
-    // ctx.request.token = ctx.get("token");
-    ctx.userInfo = {
-      user_id: 1
-    };
+    ctx.request.token = ctx.get("token");
+    await ctx.service.common.authService.authenticate();
     await next();
+
+    // ctx.userInfo = {
+    //   user_id: 1
+    // };
+    // await next();
     // try {
     //   await ctx.service.common.authService.authenticate();
     //   await next();

@@ -21,9 +21,13 @@ class CartService extends Service {
       amount
     } = cartInfo;
 
+    // 先拿商品
+    const goods = await this.app.mysql.get("zshop_tb_goods", { goods_id });
+    const { main_imgs } = goods;
+    const {ctx} = this;
     // 先查询购物车中有没有相同商品和规格
     const cartInfoExisted = await this.app.mysql.get("zshop_tb_cart", {
-      user_id: 1,
+      user_id: ctx.userInfo.user_id,
       goods_id,
       sku_spec_id: sku_id
     });
@@ -31,7 +35,7 @@ class CartService extends Service {
     let result = null;
     if (cartInfoExisted == null) {
       result = await this.app.mysql.insert("zshop_tb_cart", {
-        user_id: 1,
+        user_id: ctx.userInfo.user_id,
         goods_id,
         goods_no,
         sku_spec_id: sku_id,
@@ -60,12 +64,15 @@ class CartService extends Service {
     // 处理规格信息
     for (let index in cartInfo) {
       const cartItem = cartInfo[index];
-      const { sku_spec_id } = cartItem;
+      const { sku_spec_id, goods_id } = cartItem;
       const specValueResult = await this.productService.getSkuSpecValue(sku_spec_id);
+      const goods = await this.productService.findGoods(goods_id);
+      const { main_imgs } = goods;
       const { goods_attrs } = specValueResult;
       cartInfo[index] = {
         ...cartItem,
-        goods_attrs: JSON.parse(goods_attrs)
+        goods_attrs: JSON.parse(goods_attrs),
+        main_imgs
       };
     }
 

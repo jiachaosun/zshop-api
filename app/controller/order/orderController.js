@@ -13,6 +13,14 @@ class OrderController extends Controller {
     const orders = await this.orderService.list();
     this.success(orders);
   }
+
+  async detail() {
+    const { ctx } = this;
+    const { request } = ctx;
+    const { query } = request;
+    const detail = await this.orderService.getOrderDetail(query);
+    this.success(detail);
+  }
 }
 
 module.exports = OrderController;

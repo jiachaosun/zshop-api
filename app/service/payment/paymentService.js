@@ -12,8 +12,9 @@ class PaymentService extends Service {
     this.userService = ctx.service.common.userService;
   }
 
-  async createPrepayInfo(order_sn) {
-    const orderInfo = await this.app.mysql.get("zshop_tb_order", { order_sn: order_sn });
+  async createPrepayInfo(order_id) {
+    console.log("order id " + order_id);
+    const orderInfo = await this.app.mysql.get("zshop_tb_order", { id: order_id });
 
     const { user_id } = orderInfo;
     const user = await this.userService.findUserById(user_id);
@@ -95,9 +96,25 @@ class PaymentService extends Service {
     }
     const signString = this.signQuery(this.buildQuery(notifyObj));
     if (_.isEmpty(sign) || signString !== sign) {
+      // 验证支付回调的签名！
       return false;
     }
     return notifyObj;
+  }
+
+  buildQuery(queryObj) {
+    const sortPayOptions = {};
+    for (const key of Object.keys(queryObj)
+      .sort()) {
+      sortPayOptions[key] = queryObj[key];
+    }
+    let payOptionQuery = "";
+    for (const key of Object.keys(sortPayOptions)
+      .sort()) {
+      payOptionQuery += key + "=" + sortPayOptions[key] + "&";
+    }
+    payOptionQuery = payOptionQuery.substring(0, payOptionQuery.length - 1);
+    return payOptionQuery;
   }
 
   /**

@@ -15,14 +15,24 @@ class CheckoutService extends Service {
 
   async getCheckoutInfo() {
     const cartData = await this.cartService.getCart();
-    const selectedCartData = cartData.filter(
+    let selectedCartData = cartData.filter(
       cartItem => cartItem.selected === 1
     );
 
-    console.log("=== 选中的购物车数据 ===");
-    console.log(selectedCartData);
+    let newCartItemList = [];
+    for (let cartItem of selectedCartData) {
+      const goods = await this.productService.findGoods(cartItem.goods_id);
+      const { main_imgs } = goods;
+      newCartItemList.push({
+        ...cartItem,
+        main_imgs
+      });
+    }
 
-    return selectedCartData;
+    return {
+      cart_items: newCartItemList,
+      total_goods_price: this.calcTotalGoodsPrice(selectedCartData)
+    };
   }
 
   async submitOrder(address) {
@@ -71,7 +81,9 @@ class CheckoutService extends Service {
       created_time: currentTime,
       goods_price: goodsTotalPrice,
       order_price: orderTotalPrice,
-      actual_price: actualPrice
+      actual_price: actualPrice,
+
+      order_status: 1 // 1：已生成订单，未支付
     };
 
     const orderId = await this.orderService.createOrder(orderInfo);
@@ -81,14 +93,14 @@ class CheckoutService extends Service {
 
       const specValueResult = await this.productService.getSkuSpecValue(goodsItem.sku_spec_id);
 
-      const result = await this.app.mysql.insert("zshop_tb_order_goods", {
+      await this.app.mysql.insert("zshop_tb_order_goods", {
         order_id: orderId,
         goods_id: goodsItem.goods_id,
         // goods_sn: goodsItem.goods_sn,
         sku_spec_id: goodsItem.sku_spec_id,
         amount: goodsItem.amount,
         goods_name: goodsItem.goods_name,
-        pic_url: goodsItem.list_pic_url,
+        pic_url: isNil(goodsItem.main_imgs) ? "" : goodsItem.main_imgs.split(",")[0],
         market_price: goodsItem.market_price,
         retail_price: goodsItem.price,
         sku_attrs_values: specValueResult.goods_attrs
@@ -113,6 +125,15 @@ class CheckoutService extends Service {
       padStart(date.getSeconds(), 2, "0") +
       random(100000, 999999)
     );
+  }
+
+  calcTotalGoodsPrice(selectedGoodsInCart) {
+    // 统计商品总价
+    let goodsTotalPrice = 0.0;
+    for (const cartItem of selectedGoodsInCart) {
+      goodsTotalPrice += cartItem.amount * cartItem.price;
+    }
+    return goodsTotalPrice;
   }
 }
 

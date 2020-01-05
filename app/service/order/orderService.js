@@ -19,16 +19,32 @@ class OrderService extends Service {
     for (let orderItem of orders) {
       // 获取订单下属的商品列表
       const orderGoods = await this.getOrderGoods(orderItem.id);
+      let totalGoodsCount = 0;
+      orderGoods.forEach(goods => {
+        totalGoodsCount += goods.amount;
+      });
       newOrderList.push({
         ...orderItem,
         created_time: dayjs(orderItem.created_time) //转换时间
           .format("YYYY-MM-DD HH:mm:ss"),
-        order_goods: orderGoods
+        order_goods: orderGoods,
+        totalGoodsCount,
+        order_display_status: this.getOrderDisplayStatus(orderItem.order_status)
       });
     }
 
     return newOrderList;
   }
+
+  getOrderDisplayStatus(status) {
+    switch (parseInt(status)) {
+      case 1:
+        return "待支付";
+      case 2:
+        return "已支付";
+    }
+  }
+
 
   async getOrder(params) {
     const order = await this.app.mysql.get(ORDER_TABLE_NAME, { ...params });
@@ -48,11 +64,38 @@ class OrderService extends Service {
     return result.affectedRows === 1;
   }
 
+  /**
+   * 获取订单下的sku信息
+   * @param orderId 订单编号
+   */
   async getOrderGoods(orderId) {
     const results = await this.app.mysql.select("zshop_tb_order_goods", {
       where: { order_id: orderId }
     });
     return results;
+  }
+
+  /**
+   * 订单详情
+   * @param params
+   */
+  async getOrderDetail(params) {
+    const { order_id } = params;
+    const orderInfo = await this.getOrder({ id: order_id });
+    let orderGoods = await this.getOrderGoods(order_id);
+    orderGoods = orderGoods.map(orderGood => {
+      return {
+        ...orderGood,
+        sku_attrs_values: JSON.parse(orderGood.sku_attrs_values)
+      };
+    });
+
+    return {
+      ...orderInfo,
+      created_time: dayjs(orderInfo.created_time) //转换时间
+        .format("YYYY-MM-DD HH:mm:ss"),
+      order_goods: orderGoods
+    };
   }
 }
 

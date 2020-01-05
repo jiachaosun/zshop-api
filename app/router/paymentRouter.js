@@ -2,6 +2,7 @@
 
 module.exports = app => {
   const { router, controller } = app;
-  router.post("/pay/prepay", controller.payment.paymentController.prepay);
-  router.post("/pay/notify", controller.payment.paymentController.notifyCallback);
+  const paymentController = controller.payment.paymentController;
+  router.post("/pay/prepay", paymentController.prepay);
+  router.post("/pay/notify", paymentController.notifyCallback);
 };

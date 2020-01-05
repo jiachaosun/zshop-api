@@ -12,8 +12,8 @@ class PaymentController extends Controller {
 
   async prepay() {
     const { ctx } = this;
-    const { order_sn } = ctx.request.body;
-    const result = await this.paymentService.createPrepayInfo(order_sn);
+    const { order_id } = ctx.request.body;
+    const result = await this.paymentService.createPrepayInfo(order_id);
     this.success(result);
   }
 
@@ -23,15 +23,18 @@ class PaymentController extends Controller {
     let xmlContent;
     try {
       xmlContent = await xml2js.parseStringPromise(xml);
-      console.log(xmlContent);
+      const payResult = this.paymentService.payNotify(xmlContent.xml);
+      if (!payResult) {
+        return `<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[支付失败]]></return_msg></xml>`;
+      }
 
-      const { out_trade_no, transaction_id } = xmlContent.xml;
+      const { out_trade_no, transaction_id } = payResult;
       const order = await this.orderService.getOrder({ order_sn: out_trade_no });
       const updateResult = await this.orderService.updateOrder({
         id: order.id,
         pay_id: transaction_id,
-        pay_status: 2,
-        order_status: 2
+        pay_status: 2, //支付回调成功
+        order_status: 2 //已支付
       });
       if (updateResult) {
         ctx.body = `<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>`;

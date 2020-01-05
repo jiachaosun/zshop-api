@@ -13,7 +13,8 @@ class AuthService extends Service {
       "/auth/weixin",
       "/pay/notify",
       "/home/index",
-      "/goods/detail"
+      "/goods/detail",
+      "/category/list"
     ]; // 不需要校验的请求
   }
 
@@ -25,23 +26,25 @@ class AuthService extends Service {
     // 过滤无需校验登录请求
     if (this.hasIncludes(ctx.request.url, this.notLoginUrlList())) return;
     const token = ctx.request.token;
+    console.log("token = " + token);
     let user;
-    // 目前无token过期机制
-    const _token = await parse(token);
-    // if (!_token) {
-    //   throw new Error("123");
-    // }
-    const { user_id } = _token;
-    user = await this.userService.findUserById(user_id);
-    // if (!user) {
-    //   throw new Error("456");
-    // }
-    console.log("user_id = " + user_id + ", name = " + user.nickname);
-    ctx.userInfo = {
-      user_id: user.id,
-      name: user.name,
-      mobile: user.mobile
-    };
+    try {
+      // 目前无token过期机制
+      const _token = await parse(token);
+      const { user_id } = _token;
+      user = await this.userService.findUserById(user_id);
+      console.log("user_id = " + user_id + ", name = " + user.nickname);
+      ctx.userInfo = {
+        user_id: user.id,
+        name: user.name,
+        mobile: user.mobile
+      };
+    } catch (e) {
+      console.log(e);
+      e.status = 401;
+      e.message = "未登录";
+      ctx.throw(e);
+    }
   }
 
   hasIncludes(requestUrl, array) {

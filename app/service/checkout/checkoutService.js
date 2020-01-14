@@ -20,8 +20,10 @@ class CheckoutService extends Service {
     );
 
     let newCartItemList = [];
+    let totalGoodsCount = 0;
     for (let cartItem of selectedCartData) {
       const goods = await this.productService.findGoods(cartItem.goods_id);
+      totalGoodsCount += cartItem.amount;
       const { main_imgs } = goods;
       newCartItemList.push({
         ...cartItem,
@@ -31,7 +33,8 @@ class CheckoutService extends Service {
 
     return {
       cart_items: newCartItemList,
-      total_goods_price: this.calcTotalGoodsPrice(selectedCartData)
+      total_goods_price: this.calcTotalGoodsPrice(selectedCartData),
+      totalGoodsCount
     };
   }
 
@@ -133,7 +136,7 @@ class CheckoutService extends Service {
     for (const cartItem of selectedGoodsInCart) {
       goodsTotalPrice += cartItem.amount * cartItem.price;
     }
-    return goodsTotalPrice;
+    return goodsTotalPrice.toFixed(2);
   }
 }
 

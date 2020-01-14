@@ -36,27 +36,33 @@ class ProductService extends Service {
         LEFT JOIN zshop_tb_category_goods_attrs_value AS tb_attr_value ON tb_attr_name.common_attr_id = tb_attr_value.category_attr_id 
         AND tb_attr_value.goods_id = ${id}
         `);
+
     // 拿规格属性名
     const attrNames = await this.app.mysql.select("zshop_tb_goods_attrs", {
       where: { category_id },
       columns: [ "attr_id", "attr_name" ]
     });
 
-    // 拿规格属性值
+    // 拿当前spu下的销售属性值得id
+    const saleAttrs = await this.app.mysql.select("zshop_tb_specs_attrs", {
+      where: { goods_id },
+      columns: [ "goods_attr_id", "goods_attr_value_id" ]
+    });
+
+    // 处理销售属性数据结构
     const specs = {};
     for (let index in attrNames) {
-      const { attr_id, attr_name } = attrNames[index];
-      const attrValues = await this.app.mysql.select(
-        "zshop_tb_goods_attrs_value",
-        {
-          where: { attr_id: attr_id },
-          columns: [ "id", "attr_id", "attr_value" ]
-        }
-      );
-      specs[attr_name] = attrValues.map(_attrValues => ({
-        ..._attrValues,
-        selected: false
-      }));
+      const { attr_id, attr_name } = attrNames[index]; //销售属性名的id
+      const specsAllValuesList = [];
+      for (let attrValueIndex in saleAttrs) {
+        const { goods_attr_value_id } = saleAttrs[attrValueIndex];
+        const specValue = await this.app.mysql.get("zshop_tb_goods_attrs_value", { id: goods_attr_value_id });
+        specsAllValuesList.push({
+          ...specValue,
+          selected: false
+        });
+      }
+      specs[attr_name] = specsAllValuesList;
     }
 
     // 拿sku
@@ -66,9 +72,9 @@ class ProductService extends Service {
     });
     const result = {
       ...goods,
-      specs,
+      specs, // 销售属性
       skus: specsUnderGoods,
-      common_attrs: commonAttrsValues
+      common_attrs: commonAttrsValues // 展示的通用商品属性
     };
     return result;
   }

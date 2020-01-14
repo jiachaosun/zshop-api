@@ -26,6 +26,7 @@ class AuthService extends Service {
     // 过滤无需校验登录请求
     if (this.hasIncludes(ctx.request.url, this.notLoginUrlList())) return;
     const token = ctx.request.token;
+    console.log("url = " + ctx.request.url);
     console.log("token = " + token);
     let user;
     try {

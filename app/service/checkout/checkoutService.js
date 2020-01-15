@@ -14,7 +14,7 @@ class CheckoutService extends Service {
   }
 
   async getCheckoutInfo() {
-    const cartData = await this.cartService.getCart();
+    const cartData = await this.cartService.getCart({ selected: 1 });
     let selectedCartData = cartData.filter(
       cartItem => cartItem.selected === 1
     );
@@ -40,7 +40,7 @@ class CheckoutService extends Service {
 
   async submitOrder(address) {
     // 购物车中选中的商品
-    const selectedGoodsInCart = await this.cartService.getCart();
+    const selectedGoodsInCart = await this.cartService.getCart({ selected: 1 });
 
     // 解析地址
     const {

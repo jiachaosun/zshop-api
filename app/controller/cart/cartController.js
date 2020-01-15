@@ -22,7 +22,7 @@ class CartController extends Controller {
       sku_id,
       goods_name,
       price,
-      amount,
+      amount
     } = body; //规格数据
 
     const cartId = await this.cartService.add({
@@ -32,7 +32,7 @@ class CartController extends Controller {
       sku_id,
       goods_name,
       price,
-      amount,
+      amount
     });
     this.success(cartId);
   }
@@ -42,6 +42,14 @@ class CartController extends Controller {
 
     const cartInfo = await this.cartService.getCart();
     this.success(cartInfo);
+  }
+
+  async updateCart() {
+    const { ctx } = this;
+    const { request } = ctx;
+    const params = request.body;
+    await this.cartService.updateCart(params);
+    this.success(1);
   }
 }
 

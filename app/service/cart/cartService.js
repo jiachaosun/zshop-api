@@ -24,7 +24,7 @@ class CartService extends Service {
     // 先拿商品
     const goods = await this.app.mysql.get("zshop_tb_goods", { goods_id });
     const { main_imgs } = goods;
-    const {ctx} = this;
+    const { ctx } = this;
     // 先查询购物车中有没有相同商品和规格
     const cartInfoExisted = await this.app.mysql.get("zshop_tb_cart", {
       user_id: ctx.userInfo.user_id,
@@ -56,9 +56,9 @@ class CartService extends Service {
     return result.insertId;
   }
 
-  async getCart() {
+  async getCart(query = {}) {
     const cartInfo = await this.app.mysql.select("zshop_tb_cart", {
-      where: { user_id: this.ctx.userInfo.user_id }
+      where: { user_id: this.ctx.userInfo.user_id, ...query }
     });
 
     // 处理规格信息
@@ -76,8 +76,16 @@ class CartService extends Service {
       };
     }
 
-
     return cartInfo;
+  }
+
+  async updateCart(params) {
+    const { cartInfo } = params;
+    for (let cartItem of cartInfo) {
+      await this.app.mysql.update("zshop_tb_cart", { amount: cartItem.amount, selected: cartItem.selected }, {
+        where: { id: cartItem.id }
+      });
+    }
   }
 }
 

@@ -33,6 +33,7 @@ class AuthService extends Service {
       // 目前无token过期机制
       const _token = await parse(token);
       const { user_id } = _token;
+      console.log("user_id = " + user_id);
       user = await this.userService.findUserById(user_id);
       console.log("user_id = " + user_id + ", name = " + user.nickname);
       ctx.userInfo = {

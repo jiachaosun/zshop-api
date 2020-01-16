@@ -99,6 +99,7 @@ class PaymentService extends Service {
       // 验证支付回调的签名！
       return false;
     }
+    console.log("支付验证回调验签名通过~");
     return notifyObj;
   }
 

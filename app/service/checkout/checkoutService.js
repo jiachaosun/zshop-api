@@ -13,35 +13,56 @@ class CheckoutService extends Service {
     this.productService = ctx.service.product.productService;
   }
 
-  async getCheckoutInfo() {
-    const cartData = await this.cartService.getCart({ selected: 1 });
-    let selectedCartData = cartData.filter(
-      cartItem => cartItem.selected === 1
-    );
-
+  async getCheckoutInfo(params) {
+    // type = 1 直接下单， = 2购物车下单
     let newCartItemList = [];
     let totalGoodsCount = 0;
-    for (let cartItem of selectedCartData) {
-      const goods = await this.productService.findGoods(cartItem.goods_id);
-      totalGoodsCount += cartItem.amount;
+    let total_goods_price = 0;
+    const { type, goods_id, sku_id } = params;
+    console.log(params);
+    if (type === "2") {
+      const cartData = await this.cartService.getCart({ selected: 1 });
+      let selectedCartData = cartData.filter(
+        cartItem => cartItem.selected === 1
+      );
+
+      for (let cartItem of selectedCartData) {
+        const goods = await this.productService.findGoods(cartItem.goods_id);
+        totalGoodsCount += cartItem.amount;
+        const { main_imgs } = goods;
+        newCartItemList.push({
+          ...cartItem,
+          main_imgs
+        });
+      }
+
+      total_goods_price = this.calcTotalGoodsPrice(selectedCartData);
+    } else if (type === "1") {
+      const goods = await this.productService.findGoods(goods_id);
+      const specValueResult = await this.productService.getSkuSpecValue(sku_id);
       const { main_imgs } = goods;
+      const { goods_attrs, price } = specValueResult;
       newCartItemList.push({
-        ...cartItem,
+        ...goods,
+        goods_name: goods.name,
+        goods_attrs: JSON.parse(goods_attrs),
+        price,
+        amount: 1,
         main_imgs
       });
+      total_goods_price = price;
+      totalGoodsCount = 1;
     }
 
     return {
       cart_items: newCartItemList,
-      total_goods_price: this.calcTotalGoodsPrice(selectedCartData),
+      total_goods_price,
       totalGoodsCount
     };
   }
 
-  async submitOrder(address) {
-    // 购物车中选中的商品
-    const selectedGoodsInCart = await this.cartService.getCart({ selected: 1 });
-
+  async submitOrder(params) {
+    const { type, goods_id, sku_id, addressInfo } = params;
     // 解析地址
     const {
       cityName,
@@ -52,10 +73,30 @@ class CheckoutService extends Service {
       provinceName,
       telNumber,
       userName
-    } = address;
+    } = addressInfo;
+
+    let selectedGoodsInCart = [];
+    let goodsTotalPrice = 0.0;
+    if (type === "0") {
+      const goods = await this.productService.findGoods(goods_id);
+      const specValueResult = await this.productService.getSkuSpecValue(sku_id);
+      const { main_imgs } = goods;
+      const { goods_attrs, price } = specValueResult;
+      selectedGoodsInCart.push({
+        ...goods,
+        goods_name: goods.name,
+        goods_attrs: JSON.parse(goods_attrs),
+        price,
+        amount: 1,
+        main_imgs,
+        sku_spec_id: sku_id
+      });
+    } else {
+      // 购物车中选中的商品
+      selectedGoodsInCart = await this.cartService.getCart({ selected: 1 });
+    }
 
     // 统计商品总价
-    let goodsTotalPrice = 0.0;
     for (const cartItem of selectedGoodsInCart) {
       goodsTotalPrice += cartItem.amount * cartItem.price;
     }

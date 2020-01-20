@@ -3,7 +3,7 @@ const keys = require("lodash/keys");
 const isNil = require("lodash/isNil");
 const { getHomeConfigData } = require("../../utils/homeDataUtils");
 
-const homeProductIds = [ 1 ];
+const homeProductIds = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14 ];
 
 class HomeService extends Service {
   constructor(ctx) {

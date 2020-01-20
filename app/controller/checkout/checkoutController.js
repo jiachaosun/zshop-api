@@ -14,10 +14,9 @@ class CheckoutController extends Controller {
   async checkout() {
     const { ctx } = this;
     const { request } = ctx;
-    const { body } = request;
+    const params = request.query;
 
-    const checkoutInfo = await this.checkoutService.getCheckoutInfo();
-
+    const checkoutInfo = await this.checkoutService.getCheckoutInfo(params);
     this.success(checkoutInfo);
   }
 
@@ -27,18 +26,8 @@ class CheckoutController extends Controller {
   async submitOrder() {
     const { ctx } = this;
     const { request } = ctx;
-    const { body } = request;
-
-    const {
-      checkoutInfo,
-      addressInfo
-    } = body;
-
-    console.log(checkoutInfo);
-    console.log(addressInfo);
-
-    const orderInfo = await this.checkoutService.submitOrder(addressInfo);
-
+    const params = request.body;
+    const orderInfo = await this.checkoutService.submitOrder(params);
     this.success(orderInfo);
   }
 }

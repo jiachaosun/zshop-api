@@ -51,6 +51,14 @@ class CartController extends Controller {
     await this.cartService.updateCart(params);
     this.success(1);
   }
+
+  async deleteCart() {
+    const { ctx } = this;
+    const { request } = ctx;
+    const params = request.body;
+    await this.cartService.deleteCart(params);
+    this.success(1);
+  }
 }
 
 module.exports = CartController;

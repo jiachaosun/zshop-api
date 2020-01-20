@@ -87,6 +87,11 @@ class CartService extends Service {
       });
     }
   }
+
+  async deleteCart(params) {
+    const { cartItemId } = params;
+    await this.app.mysql.delete("zshop_tb_cart", { id: cartItemId });
+  }
 }
 
 module.exports = CartService;

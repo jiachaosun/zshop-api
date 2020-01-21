@@ -4,8 +4,7 @@ const Controller = require("../../core/baseController");
 const crypto = require("crypto");
 const isEmpty = require("lodash/isEmpty");
 const uuidv1 = require("uuid/v1");
-const jwt = require("jsonwebtoken");
-const secret = "zhuerlehaha6233@@";
+const tokenUtils = require("../../utils/token");
 
 class AuthController extends Controller {
   constructor(ctx) {
@@ -76,7 +75,7 @@ class AuthController extends Controller {
     // 重新查出来
     const newUser = await this.userService.findUserById(userId);
 
-    var token = jwt.sign({ user_id: userId }, secret);
+    const token = tokenUtils.create({ user_id: userId });
     console.log("token = " + token);
 
     // const allProducts = await ctx.service.product.findAll()

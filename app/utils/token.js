@@ -1,10 +1,9 @@
 const jwt = require("jsonwebtoken");
-const secret = "zhuerlehaha6233@@";
+const secret = "zhuerlehaha6233@!";
 const _ = require("lodash");
 
 async function create(userInfo) {
-  const token = jwt.sign(userInfo, secret);
-  return token;
+  return jwt.sign(userInfo, secret, { expiresIn: 60 * 10 });
 }
 
 async function parse(token) {
@@ -12,6 +11,7 @@ async function parse(token) {
     try {
       return jwt.verify(token, secret);
     } catch (err) {
+      console.log(err);
       return null;
     }
   }

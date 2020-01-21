@@ -54,7 +54,6 @@ class AuthController extends Controller {
     const clientIp = this.ctx.socket.remoteAddress;
     let user = await this.userService.findByOpenId(wechatUserInfo.openId);
     let userId;
-    console.log(user);
     console.log("找到 user 了没？ ", user != null);
     if (user == null) {
       userId = await this.userService.add({
@@ -75,7 +74,7 @@ class AuthController extends Controller {
     // 重新查出来
     const newUser = await this.userService.findUserById(userId);
 
-    const token = tokenUtils.create({ user_id: userId });
+    const token = await tokenUtils.create({ user_id: userId });
     console.log("token = " + token);
 
     // const allProducts = await ctx.service.product.findAll()

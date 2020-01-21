@@ -12,7 +12,10 @@ class OrderService extends Service {
   }
 
   async list() {
-    const orders = await this.app.mysql.select(ORDER_TABLE_NAME);
+    const { ctx } = this;
+    const orders = await this.app.mysql.select(ORDER_TABLE_NAME, {
+      where: { user_id: ctx.userInfo.user_id }
+    });
 
     //处理数据格式
     let newOrderList = [];

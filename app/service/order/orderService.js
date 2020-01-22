@@ -45,6 +45,10 @@ class OrderService extends Service {
         return "待支付";
       case 2:
         return "已支付";
+      case 3:
+        return "已取消";
+      case 4:
+        return "已退款";
     }
   }
 

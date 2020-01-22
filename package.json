@@ -15,9 +15,10 @@
     "egg-validate": "^2.0.2",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.15",
-    "md5": "latest",
+    "md5": "^2.2.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
+    "tenpay": "^2.1.18",
     "uuid": "^3.3.3",
     "weixinpay": "^1.0.12",
     "xml2js": "^0.4.22"

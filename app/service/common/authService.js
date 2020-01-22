@@ -13,6 +13,7 @@ class AuthService extends Service {
     this.filterList = [
       "/auth/weixin",
       "/pay/notify",
+      "/pay/refund_notify",
       "/home/index",
       "/goods/detail",
       "/category/list"

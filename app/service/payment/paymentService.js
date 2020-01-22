@@ -1,9 +1,7 @@
 // app/service/product.js
 const Service = require("egg").Service;
 const _ = require("lodash");
-const crypto = require("crypto");
-const md5 = require("md5");
-const rp = require("request-promise");
+const tenpay = require("tenpay");
 
 class PaymentService extends Service {
 
@@ -31,47 +29,58 @@ class PaymentService extends Service {
     return returnParams;
   }
 
+  async refund(order_id) {
+    console.log(order_id);
+    const orderInfo = await this.app.mysql.get("zshop_tb_order", { id: order_id });
+
+    const { user_id } = orderInfo;
+    const user = await this.userService.findUserById(user_id);
+    const { weixin_openid } = user;
+
+    const weixinConfig = this.config.weixin;
+    const { appid, secret, mch_id, partner_key, refund_url } = weixinConfig;
+    const api = new tenpay({
+      appid: appid, // 微信小程序appid
+      mchid: mch_id, // 商户帐号ID
+      partnerKey: partner_key, // 秘钥
+      refund_url: refund_url,
+      pfx: require("fs")
+        .readFileSync("./cert/apiclient_cert.p12")
+    });
+
+    let result = await api.refund({
+      out_trade_no: orderInfo.order_sn,
+      out_refund_no: orderInfo.order_sn,
+      total_fee: 1,
+      refund_fee: 1
+    });
+
+    console.log(result);
+    return result;
+  }
+
   async createUnifiedOrder(prepayInfo) {
     const weixinConfig = this.config.weixin;
     const { appid, secret, mch_id, partner_key, notify_url } = weixinConfig;
-    console.log("weixinConfig => " + JSON.stringify(weixinConfig));
-    console.log("mch_id => " + mch_id);
-    const WeiXinPay = require("weixinpay");
-    const weixinpay = new WeiXinPay({
+
+    const api = new tenpay({
       appid: appid, // 微信小程序appid
-      openid: prepayInfo.openid, // 用户openid
-      mch_id: mch_id, // 商户帐号ID
-      partner_key: partner_key // 秘钥
+      mchid: mch_id, // 商户帐号ID
+      partnerKey: partner_key, // 秘钥
+      notify_url: notify_url
     });
 
-    return new Promise((resolve, reject) => {
-      weixinpay.createUnifiedOrder({
-        body: prepayInfo.body,
-        out_trade_no: prepayInfo.out_trade_no,
-        total_fee: prepayInfo.total_fee,
-        spbill_create_ip: prepayInfo.spbill_create_ip,
-        notify_url: notify_url,
-        trade_type: "JSAPI"
-      }, (res) => {
-        console.log(res);
-        if (res.return_code === "SUCCESS" && res.result_code === "SUCCESS") {
-          const returnParams = {
-            "appid": res.appid,
-            "timeStamp": parseInt(Date.now() / 1000) + "",
-            "nonceStr": res.nonce_str,
-            "package": "prepay_id=" + res.prepay_id,
-            total_fee: prepayInfo.total_fee,
-            "signType": "MD5"
-          };
-          const paramStr = `appId=${returnParams.appid}&nonceStr=${returnParams.nonceStr}&package=${returnParams.package}&signType=${returnParams.signType}&timeStamp=${returnParams.timeStamp}&key=` + weixinConfig.partner_key;
-          returnParams.paySign = md5(paramStr)
-            .toUpperCase();
-          resolve(returnParams);
-        } else {
-          reject(res);
-        }
-      });
+    let result = await api.getPayParams({
+      out_trade_no: prepayInfo.out_trade_no,
+      body: prepayInfo.body,
+      total_fee: prepayInfo.total_fee,
+      openid: prepayInfo.openid
     });
+
+    console.log("微信支付参数");
+    console.log(result);
+
+    return result;
   }
 
   /**
@@ -103,6 +112,32 @@ class PaymentService extends Service {
     return notifyObj;
   }
 
+  refundNotify(notifyData) {
+    if (_.isEmpty(notifyData)) {
+      return false;
+    }
+
+    const notifyObj = {};
+    let sign = "";
+    for (const key of Object.keys(notifyData)) {
+      if (key !== "sign") {
+        notifyObj[key] = notifyData[key][0];
+      } else {
+        sign = notifyData[key][0];
+      }
+    }
+    if (notifyObj.return_code !== "SUCCESS") {
+      return false;
+    }
+    const signString = this.signQuery(this.buildQuery(notifyObj));
+    if (_.isEmpty(sign) || signString !== sign) {
+      // 验证支付回调的签名！
+      return false;
+    }
+    console.log("退款验证回调验签名通过~");
+    return notifyObj;
+  }
+
   buildQuery(queryObj) {
     const sortPayOptions = {};
     for (const key of Object.keys(queryObj)
@@ -126,6 +161,14 @@ class PaymentService extends Service {
     const md5 = require("md5");
     const md5Sign = md5(queryStr);
     return _.toUpper(md5Sign);
+  }
+
+  decrypt(encryptedData, key, iv = "") {
+    let decipher = crypto.createDecipheriv("aes-256-ecb", key, iv);
+    decipher.setAutoPadding(true);
+    let decoded = decipher.update(encryptedData, "base64", "utf8");
+    decoded += decipher.final("utf8");
+    return decoded;
   }
 }
 

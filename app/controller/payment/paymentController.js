@@ -45,6 +45,45 @@ class PaymentController extends Controller {
       ctx.body = `<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[支付失败]]></return_msg></xml>`;
     }
   }
+
+  async refund() {
+    const { ctx } = this;
+    const { order_id } = ctx.request.body;
+    const result = await this.paymentService.refund(order_id);
+    this.success(result);
+  }
+
+  async notifyRefundCallback() {
+    const { ctx } = this;
+    let info = ctx.request.weixin;
+    console.log(info);
+    // const xml = ctx.request.body;
+    // let xmlContent;
+    // try {
+    //   xmlContent = await xml2js.parseStringPromise(xml);
+    //   const refundResult = this.paymentService.refundNotify(xmlContent.xml);
+    //   console.log(refundResult);
+    //   if (!refundResult) {
+    //     return `<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[支付失败]]></return_msg></xml>`;
+    //   }
+    //
+    //   const { out_trade_no, transaction_id } = refundResult;
+    //   const order = await this.orderService.getOrder({ order_sn: out_trade_no });
+    //   const updateResult = await this.orderService.updateOrder({
+    //     id: order.id,
+    //     pay_id: transaction_id,
+    //     pay_status: 3, //2支付成功，3退款成功
+    //     order_status: 3 //2支付成功，3订单取消退款中，4订单取消已退款
+    //   });
+    //   if (updateResult) {
+    //     ctx.body = `<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>`;
+    //   } else {
+    //
+    //   }
+    // } catch (e) {
+    //   ctx.body = `<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[支付失败]]></return_msg></xml>`;
+    // }
+  }
 }
 
 module.exports = PaymentController;

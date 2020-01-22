@@ -56,6 +56,13 @@ class PaymentService extends Service {
     });
 
     console.log(result);
+
+    const updateResult = await this.orderService.updateOrder({
+      id: orderInfo.id,
+      pay_status: 3, //2支付成功，3退款成功
+      order_status: 3 //2支付成功，3订单取消退款中，4订单取消已退款
+    });
+
     return result;
   }
 

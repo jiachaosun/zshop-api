@@ -63,8 +63,8 @@ class PaymentController extends Controller {
     const updateResult = await this.orderService.updateOrder({
       id: order.id,
       pay_id: transaction_id,
-      pay_status: 3, //2支付成功，3退款成功
-      order_status: 3 //2支付成功，3订单取消退款中，4订单取消已退款
+      pay_status: 4, //2支付成功，3退款成功
+      order_status: 4 //2支付成功，3订单取消退款中，4订单取消已退款
     });
 
     this.success(updateResult);
